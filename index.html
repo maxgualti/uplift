@@ -152,6 +152,17 @@
       gap: 10px;
     }
 
+    .compact-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .compact-row input {
+      min-width: 0;
+    }
+
     .exercise-card {
       background: var(--card-2);
       border: 1px solid var(--border);
@@ -247,7 +258,7 @@
     }
 
     @media (max-width: 640px) {
-      .grid-2, .row, .summary-grid { grid-template-columns: 1fr; }
+      .grid-2, .row, .summary-grid, .compact-row { grid-template-columns: 1fr; }
       .set-grid { grid-template-columns: 56px 1fr 1fr auto; }
       .app { padding-left: 12px; padding-right: 12px; }
     }
@@ -330,7 +341,7 @@
     <section id="manualScreen" class="hidden">
       <div class="card">
         <h2>Log Workout</h2>
-        <div class="row">
+        <div class="compact-row">
           <div>
             <label for="manualDate">Date</label>
             <input id="manualDate" type="date" />
@@ -607,6 +618,7 @@
             `).join('')}
             <div class="btn-row" style="margin-top: 10px;">
               <button class="btn btn-secondary" onclick="addSet(${exIndex}, false)">+ Add Set</button>
+              <button class="btn btn-secondary" onclick="copyPreviousSet(${exIndex}, false)">Copy Set</button>
             </div>
           </div>
         `;
@@ -718,6 +730,7 @@
             `).join('')}
             <div class="btn-row" style="margin-top: 10px;">
               <button class="btn btn-secondary" onclick="addSet(${exIndex}, true)">+ Add Set</button>
+              <button class="btn btn-secondary" onclick="copyPreviousSet(${exIndex}, true)">Copy Set</button>
             </div>
           </div>
         `;
@@ -804,6 +817,18 @@
       isManual ? renderManualExercises() : renderCurrentWorkout();
     }
 
+    function copyPreviousSet(exIndex, isManual) {
+      const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
+      const sets = arr[exIndex].sets;
+      if (!sets.length) {
+        sets.push({ weight: '', reps: '' });
+      } else {
+        const previousSet = sets[sets.length - 1];
+        sets.push({ weight: previousSet.weight, reps: previousSet.reps });
+      }
+      isManual ? renderManualExercises() : renderCurrentWorkout();
+    }
+
     function removeSet(exIndex, setIndex, isManual) {
       const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
       arr[exIndex].sets.splice(setIndex, 1);
@@ -866,6 +891,7 @@
     }
 
     window.addSet = addSet;
+    window.copyPreviousSet = copyPreviousSet;
     window.removeSet = removeSet;
     window.removeExercise = removeExercise;
     window.updateSetValue = updateSetValue;
