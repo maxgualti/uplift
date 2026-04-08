@@ -295,6 +295,7 @@
               <option>Pull</option>
               <option>Shoulders</option>
               <option>Legs</option>
+              <option>Arms</option>
             </select>
           </div>
         <div class="divider"></div>
@@ -335,13 +336,13 @@
             <input id="manualDate" type="date" />
           </div>
           <div>
-            <label for="manualTime">Start Time</label>
+            <label for="manualTime">Start Time (optional)</label>
             <input id="manualTime" type="time" />
           </div>
         </div>
         <div class="row" style="margin-top: 10px;">
           <div>
-            <label for="manualDuration">Duration (minutes)</label>
+            <label for="manualDuration">Duration (minutes, optional)</label>
             <input id="manualDuration" type="number" min="1" placeholder="60" />
           </div>
           <div>
@@ -356,6 +357,7 @@
             <option>Pull</option>
             <option>Shoulders</option>
             <option>Legs</option>
+            <option>Arms</option>
           </select>
         </div>
         <div class="divider"></div>
@@ -446,6 +448,8 @@
 
     function wireEvents() {
       document.getElementById('homeBtn').addEventListener('click', () => {
+        if (state.currentWorkout && !confirm('Are you sure you want to cancel workout?')) return;
+        state.currentWorkout = null;
         stopTimer();
         showScreen('home');
         renderHome();
@@ -503,7 +507,7 @@
           </div>
           <div class="summary-stat">
             <div class="tiny muted">Duration</div>
-            <div>${last.durationMinutes} min</div>
+            <div>${last.durationMinutes != null ? `${last.durationMinutes} min` : '—'}</div>
           </div>
         </div>
         <div style="margin-top: 12px;" class="muted small">
@@ -516,7 +520,7 @@
           <div class="exercise-head">
             <div>
               <strong>${escapeHtml(w.split)}</strong>
-              <div class="muted small">${formatShortDate(w.startISO)} · ${w.durationMinutes} min</div>
+              <div class="muted small">${formatShortDate(w.startISO)}${w.durationMinutes != null ? ` · ${w.durationMinutes} min` : ''}</div>
             </div>
             <div class="tiny muted">${w.exercises.length} ex.</div>
           </div>
@@ -723,21 +727,23 @@
     function saveManualWorkout() {
       const date = document.getElementById('manualDate').value;
       const time = document.getElementById('manualTime').value;
-      const duration = Number(document.getElementById('manualDuration').value || 0);
+      const durationInput = document.getElementById('manualDuration').value;
+      const duration = durationInput === '' ? null : Number(durationInput);
       const split = document.getElementById('manualSplit').value;
       const whoop = parseNullableNumber(document.getElementById('manualWhoop').value);
 
-      if (!date || !time) {
-        alert('Please enter a date and time.');
-        return;
-      }
-      if (!duration) {
-        alert('Please enter duration in minutes.');
+      if (!date) {
+        alert('Please enter a date.');
         return;
       }
 
-      const startISO = new Date(`${date}T${time}`).toISOString();
-      const endISO = new Date(new Date(startISO).getTime() + duration * 60000).toISOString();
+      const startISO = time
+        ? new Date(`${date}T${time}`).toISOString()
+        : new Date(`${date}T12:00`).toISOString();
+
+      const endISO = duration != null
+        ? new Date(new Date(startISO).getTime() + duration * 60000).toISOString()
+        : null;
 
       const workout = {
         id: crypto.randomUUID(),
