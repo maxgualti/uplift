@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gym Tracker Starter</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #171a21;
+      --card-2: #1d2230;
+      --text: #f4f7fb;
+      --muted: #a8b0c0;
+      --accent: #6ea8fe;
+      --accent-2: #8ff0c4;
+      --danger: #ff7b7b;
+      --border: #2c3444;
+      --shadow: 0 10px 30px rgba(0,0,0,.22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0d1015 0%, #121723 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: .9rem; }
+    .tiny { font-size: .78rem; }
+
+    .card {
+      background: rgba(23, 26, 33, .9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 22px;
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    h2 { font-size: 1.2rem; margin-bottom: 12px; }
+    h3 { font-size: 1rem; margin-bottom: 10px; }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .08s ease, opacity .12s ease;
+    }
+
+    .btn:hover { opacity: .95; }
+    .btn:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1420;
+    }
+
+    .btn-secondary {
+      background: #252c3b;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-success {
+      background: var(--accent-2);
+      color: #0f1715;
+    }
+
+    .btn-danger {
+      background: rgba(255,123,123,.15);
+      color: #ffb3b3;
+      border: 1px solid rgba(255,123,123,.25);
+    }
+
+    .btn-block { width: 100%; }
+
+    label {
+      display: block;
+      font-size: .88rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #111623;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 12px;
+      outline: none;
+    }
+
+    textarea { min-height: 84px; resize: vertical; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .exercise-card {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .exercise-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #111623;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      cursor: pointer;
+    }
+
+    .pill.active {
+      background: rgba(110,168,254,.16);
+      color: #d7e8ff;
+      border-color: rgba(110,168,254,.4);
+    }
+
+    .set-grid {
+      display: grid;
+      grid-template-columns: 64px 1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .set-grid .set-label {
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 700;
+      text-align: center;
+      background: #111623;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .hidden { display: none !important; }
+
+    .inline-note {
+      background: rgba(110,168,254,.1);
+      border: 1px solid rgba(110,168,254,.25);
+      color: #d9e8ff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: .88rem;
+      margin-bottom: 10px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary-stat {
+      background: #111623;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      .grid-2, .row, .summary-grid { grid-template-columns: 1fr; }
+      .set-grid { grid-template-columns: 56px 1fr 1fr auto; }
+      .app { padding-left: 12px; padding-right: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <div class="brand">Lift Tracker</div>
+        <div id="todayText" class="muted small"></div>
+      </div>
+      <button class="btn btn-secondary" id="homeBtn">Home</button>
+    </div>
+
+    <section id="homeScreen">
+      <div class="card hero">
+        <h1>Track faster. Lift smarter.</h1>
+        <p class="muted">Start a workout now or manually log one you already finished.</p>
+        <div class="grid grid-2" style="margin-top: 16px;">
+          <button class="btn btn-primary btn-block" id="startWorkoutBtn">Start Workout</button>
+          <button class="btn btn-secondary btn-block" id="logWorkoutBtn">Log Workout</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Last Workout</h2>
+        <div id="lastWorkoutSummary"></div>
+      </div>
+
+      <div class="card">
+        <h2>Recent History</h2>
+        <div id="historyList"></div>
+      </div>
+    </section>
+
+    <section id="startScreen" class="hidden">
+      <div class="card">
+        <h2>Start Workout</h2>
+        <div id="suggestionBox" class="inline-note"></div>
+        <div class="grid grid-2">
+          <div>
+            <label for="splitSelect">Workout Type</label>
+            <select id="splitSelect">
+              <option>Push</option>
+              <option>Pull</option>
+              <option>Legs</option>
+              <option>Upper</option>
+              <option>Lower</option>
+              <option>Full Body</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div>
+            <label for="musclesText">Muscles Hit</label>
+            <input id="musclesText" type="text" placeholder="Chest, shoulders, triceps" />
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="confirmStartBtn">Start This Workout</button>
+          <button class="btn btn-secondary" id="backFromStartBtn">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="activeScreen" class="hidden">
+      <div class="card">
+        <div class="exercise-head">
+          <div>
+            <h2 id="activeTitle">Workout</h2>
+            <div id="activeMeta" class="muted small"></div>
+          </div>
+          <div class="summary-stat" style="min-width: 100px; text-align:center;">
+            <div class="tiny muted">Elapsed</div>
+            <div id="timerDisplay" style="font-weight:800; font-size:1.05rem; margin-top:4px;">00:00:00</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="addExerciseBtn">+ Add Exercise</button>
+          <button class="btn btn-success" id="finishWorkoutBtn">Finish Workout</button>
+        </div>
+      </div>
+
+      <div id="exerciseList"></div>
+    </section>
+
+    <section id="manualScreen" class="hidden">
+      <div class="card">
+        <h2>Log Workout</h2>
+        <div class="row">
+          <div>
+            <label for="manualDate">Date</label>
+            <input id="manualDate" type="date" />
+          </div>
+          <div>
+            <label for="manualTime">Start Time</label>
+            <input id="manualTime" type="time" />
+          </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+          <div>
+            <label for="manualDuration">Duration (minutes)</label>
+            <input id="manualDuration" type="number" min="1" placeholder="60" />
+          </div>
+          <div>
+            <label for="manualWhoop">Whoop Strain (optional)</label>
+            <input id="manualWhoop" type="number" min="0" max="21" step="0.1" placeholder="14.3" />
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <label for="manualSplit">Workout Type</label>
+          <select id="manualSplit">
+            <option>Push</option>
+            <option>Pull</option>
+            <option>Legs</option>
+            <option>Upper</option>
+            <option>Lower</option>
+            <option>Full Body</option>
+            <option>Custom</option>
+          </select>
+        </div>
+        <div style="margin-top: 10px;">
+          <label for="manualMuscles">Muscles Hit</label>
+          <input id="manualMuscles" type="text" placeholder="Back, biceps" />
+        </div>
+        <div class="divider"></div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="manualAddExerciseBtn">+ Add Exercise</button>
+          <button class="btn btn-primary" id="saveManualBtn">Save Workout</button>
+        </div>
+      </div>
+
+      <div id="manualExerciseList"></div>
+    </section>
+
+    <section id="finishScreen" class="hidden">
+      <div class="card">
+        <h2>Finish Workout</h2>
+        <div class="summary-grid">
+          <div class="summary-stat">
+            <div class="tiny muted">Date</div>
+            <div id="finishDate"></div>
+          </div>
+          <div class="summary-stat">
+            <div class="tiny muted">Duration</div>
+            <div id="finishDuration"></div>
+          </div>
+          <div class="summary-stat">
+            <div class="tiny muted">Exercises</div>
+            <div id="finishExerciseCount"></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px;">
+          <label for="finishWhoop">Whoop Strain (optional)</label>
+          <input id="finishWhoop" type="number" min="0" max="21" step="0.1" placeholder="14.3" />
+        </div>
+
+        <div style="margin-top: 12px;">
+          <label for="finishNotes">Notes (optional)</label>
+          <textarea id="finishNotes" placeholder="Felt strong on bench, tired by incline..."></textarea>
+        </div>
+
+        <div class="divider"></div>
+        <div class="btn-row">
+          <button class="btn btn-success" id="saveFinishedWorkoutBtn">Save Workout</button>
+          <button class="btn btn-secondary" id="cancelFinishBtn">Back to Workout</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'liftTrackerWorkouts';
+
+    const state = {
+      workouts: loadWorkouts(),
+      currentWorkout: null,
+      timerInterval: null,
+      manualExercises: []
+    };
+
+    const screens = {
+      home: document.getElementById('homeScreen'),
+      start: document.getElementById('startScreen'),
+      active: document.getElementById('activeScreen'),
+      manual: document.getElementById('manualScreen'),
+      finish: document.getElementById('finishScreen')
+    };
+
+    const todayText = document.getElementById('todayText');
+    const lastWorkoutSummary = document.getElementById('lastWorkoutSummary');
+    const historyList = document.getElementById('historyList');
+    const suggestionBox = document.getElementById('suggestionBox');
+    const splitSelect = document.getElementById('splitSelect');
+    const musclesText = document.getElementById('musclesText');
+    const activeTitle = document.getElementById('activeTitle');
+    const activeMeta = document.getElementById('activeMeta');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const exerciseList = document.getElementById('exerciseList');
+    const manualExerciseList = document.getElementById('manualExerciseList');
+
+    init();
+
+    function init() {
+      todayText.textContent = formatFullDate(new Date());
+      wireEvents();
+      setManualDefaults();
+      renderHome();
+      showScreen('home');
+    }
+
+    function wireEvents() {
+      document.getElementById('homeBtn').addEventListener('click', () => {
+        stopTimer();
+        showScreen('home');
+        renderHome();
+      });
+
+      document.getElementById('startWorkoutBtn').addEventListener('click', openStartWorkout);
+      document.getElementById('logWorkoutBtn').addEventListener('click', openManualLog);
+      document.getElementById('backFromStartBtn').addEventListener('click', () => showScreen('home'));
+      document.getElementById('confirmStartBtn').addEventListener('click', startWorkout);
+      document.getElementById('addExerciseBtn').addEventListener('click', () => addExerciseToCurrentWorkout());
+      document.getElementById('finishWorkoutBtn').addEventListener('click', openFinishScreen);
+      document.getElementById('cancelFinishBtn').addEventListener('click', () => showScreen('active'));
+      document.getElementById('saveFinishedWorkoutBtn').addEventListener('click', saveFinishedWorkout);
+
+      document.getElementById('manualAddExerciseBtn').addEventListener('click', () => addExerciseToManualWorkout());
+      document.getElementById('saveManualBtn').addEventListener('click', saveManualWorkout);
+    }
+
+    function loadWorkouts() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveWorkouts() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.workouts));
+    }
+
+    function showScreen(name) {
+      Object.values(screens).forEach(s => s.classList.add('hidden'));
+      screens[name].classList.remove('hidden');
+    }
+
+    function renderHome() {
+      const workouts = [...state.workouts].sort((a, b) => new Date(b.startISO) - new Date(a.startISO));
+      const last = workouts[0];
+
+      if (!last) {
+        lastWorkoutSummary.innerHTML = '<div class="empty">No workouts yet. Start one to begin tracking.</div>';
+        historyList.innerHTML = '<div class="empty">Your workout history will appear here.</div>';
+        return;
+      }
+
+      lastWorkoutSummary.innerHTML = `
+        <div class="summary-grid">
+          <div class="summary-stat">
+            <div class="tiny muted">Type</div>
+            <div>${escapeHtml(last.split)}</div>
+          </div>
+          <div class="summary-stat">
+            <div class="tiny muted">Date</div>
+            <div>${formatShortDate(last.startISO)}</div>
+          </div>
+          <div class="summary-stat">
+            <div class="tiny muted">Duration</div>
+            <div>${last.durationMinutes} min</div>
+          </div>
+        </div>
+        <div style="margin-top: 12px;" class="muted small">
+          ${escapeHtml(last.muscles || 'No muscles listed')}<br>
+          ${last.exercises.length} exercise${last.exercises.length === 1 ? '' : 's'}
+        </div>
+      `;
+
+      historyList.innerHTML = workouts.slice(0, 6).map(w => `
+        <div class="exercise-card">
+          <div class="exercise-head">
+            <div>
+              <strong>${escapeHtml(w.split)}</strong>
+              <div class="muted small">${formatShortDate(w.startISO)} · ${w.durationMinutes} min</div>
+            </div>
+            <div class="tiny muted">${w.exercises.length} ex.</div>
+          </div>
+          <div class="muted small">${escapeHtml(w.muscles || 'No muscles listed')}</div>
+        </div>
+      `).join('');
+    }
+
+    function openStartWorkout() {
+      const suggestion = getSuggestedWorkout();
+      suggestionBox.textContent = suggestion.message;
+      splitSelect.value = suggestion.split;
+      musclesText.value = suggestion.muscles;
+      showScreen('start');
+    }
+
+    function getSuggestedWorkout() {
+      const last = getMostRecentWorkout();
+      if (!last) {
+        return {
+          split: 'Push',
+          muscles: 'Chest, shoulders, triceps',
+          message: 'No previous workout found. Starting with Push is a simple default.'
+        };
+      }
+
+      const sequence = ['Push', 'Pull', 'Legs'];
+      const idx = sequence.indexOf(last.split);
+      if (idx !== -1) {
+        const nextSplit = sequence[(idx + 1) % sequence.length];
+        return {
+          split: nextSplit,
+          muscles: defaultMuscles(nextSplit),
+          message: `Last workout was ${last.split} on ${formatShortDate(last.startISO)}. Suggested next workout: ${nextSplit}.`
+        };
+      }
+
+      return {
+        split: last.split,
+        muscles: last.muscles || '',
+        message: `Last workout was ${last.split} on ${formatShortDate(last.startISO)}. Repeating that split for now.`
+      };
+    }
+
+    function defaultMuscles(split) {
+      const map = {
+        Push: 'Chest, shoulders, triceps',
+        Pull: 'Back, biceps',
+        Legs: 'Quads, hamstrings, glutes, calves',
+        Upper: 'Chest, back, shoulders, arms',
+        Lower: 'Quads, hamstrings, glutes, calves',
+        'Full Body': 'Full body',
+        Custom: ''
+      };
+      return map[split] || '';
+    }
+
+    function startWorkout() {
+      const now = new Date();
+      state.currentWorkout = {
+        id: crypto.randomUUID(),
+        split: splitSelect.value,
+        muscles: musclesText.value.trim(),
+        startISO: now.toISOString(),
+        endISO: null,
+        durationMinutes: 0,
+        whoopStrain: null,
+        notes: '',
+        exercises: []
+      };
+
+      activeTitle.textContent = `${state.currentWorkout.split} Workout`;
+      activeMeta.textContent = `${state.currentWorkout.muscles || 'No muscles listed'} · Started ${formatTime(now)}`;
+      renderCurrentWorkout();
+      startTimer();
+      showScreen('active');
+    }
+
+    function renderCurrentWorkout() {
+      const exercises = state.currentWorkout?.exercises || [];
+      if (!exercises.length) {
+        exerciseList.innerHTML = '<div class="card empty">No exercises yet. Tap “Add Exercise” to begin.</div>';
+        return;
+      }
+
+      exerciseList.innerHTML = exercises.map((ex, exIndex) => {
+        const lastData = getLastExercisePerformance(ex.name);
+        return `
+          <div class="exercise-card">
+            <div class="exercise-head">
+              <div>
+                <h3>${escapeHtml(ex.name)}</h3>
+                <div class="muted tiny">${lastData ? `Last time: ${escapeHtml(formatSetSummary(lastData.sets))}` : 'No previous data'}</div>
+              </div>
+              <button class="btn btn-danger tiny" onclick="removeExercise(${exIndex}, false)">Remove</button>
+            </div>
+            ${ex.sets.map((set, setIndex) => `
+              <div class="set-grid">
+                <div class="set-label">Set ${setIndex + 1}</div>
+                <input type="number" min="0" placeholder="Weight" value="${set.weight ?? ''}" onchange="updateSetValue(${exIndex}, ${setIndex}, 'weight', this.value, false)">
+                <input type="number" min="0" placeholder="Reps" value="${set.reps ?? ''}" onchange="updateSetValue(${exIndex}, ${setIndex}, 'reps', this.value, false)">
+                <button class="btn btn-secondary" onclick="removeSet(${exIndex}, ${setIndex}, false)">×</button>
+              </div>
+            `).join('')}
+            <div class="btn-row" style="margin-top: 10px;">
+              <button class="btn btn-secondary" onclick="addSet(${exIndex}, false)">+ Add Set</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addExerciseToCurrentWorkout() {
+      const name = prompt('Enter exercise name');
+      if (!name) return;
+      const cleanName = name.trim();
+      if (!cleanName) return;
+
+      const lastData = getLastExercisePerformance(cleanName);
+      const starterSets = lastData
+        ? lastData.sets.map(s => ({ weight: s.weight, reps: s.reps }))
+        : [{ weight: '', reps: '' }];
+
+      state.currentWorkout.exercises.push({
+        name: cleanName,
+        sets: starterSets
+      });
+
+      renderCurrentWorkout();
+    }
+
+    function openFinishScreen() {
+      if (!state.currentWorkout) return;
+      const now = new Date();
+      const durationMin = Math.max(1, Math.round((now - new Date(state.currentWorkout.startISO)) / 60000));
+      document.getElementById('finishDate').textContent = formatShortDate(state.currentWorkout.startISO);
+      document.getElementById('finishDuration').textContent = `${durationMin} min`;
+      document.getElementById('finishExerciseCount').textContent = state.currentWorkout.exercises.length;
+      document.getElementById('finishWhoop').value = '';
+      document.getElementById('finishNotes').value = '';
+      showScreen('finish');
+    }
+
+    function saveFinishedWorkout() {
+      if (!state.currentWorkout) return;
+      const end = new Date();
+      state.currentWorkout.endISO = end.toISOString();
+      state.currentWorkout.durationMinutes = Math.max(1, Math.round((end - new Date(state.currentWorkout.startISO)) / 60000));
+      state.currentWorkout.whoopStrain = parseNullableNumber(document.getElementById('finishWhoop').value);
+      state.currentWorkout.notes = document.getElementById('finishNotes').value.trim();
+
+      state.workouts.push(state.currentWorkout);
+      saveWorkouts();
+      stopTimer();
+      state.currentWorkout = null;
+      renderHome();
+      showScreen('home');
+    }
+
+    function openManualLog() {
+      setManualDefaults();
+      state.manualExercises = [];
+      renderManualExercises();
+      showScreen('manual');
+    }
+
+    function setManualDefaults() {
+      const now = new Date();
+      document.getElementById('manualDate').value = toDateInputValue(now);
+      document.getElementById('manualTime').value = toTimeInputValue(now);
+      document.getElementById('manualDuration').value = '';
+      document.getElementById('manualWhoop').value = '';
+      document.getElementById('manualSplit').value = 'Push';
+      document.getElementById('manualMuscles').value = '';
+    }
+
+    function addExerciseToManualWorkout() {
+      const name = prompt('Enter exercise name');
+      if (!name) return;
+      const cleanName = name.trim();
+      if (!cleanName) return;
+
+      const lastData = getLastExercisePerformance(cleanName);
+      const starterSets = lastData
+        ? lastData.sets.map(s => ({ weight: s.weight, reps: s.reps }))
+        : [{ weight: '', reps: '' }];
+
+      state.manualExercises.push({ name: cleanName, sets: starterSets });
+      renderManualExercises();
+    }
+
+    function renderManualExercises() {
+      if (!state.manualExercises.length) {
+        manualExerciseList.innerHTML = '<div class="card empty">No exercises added yet.</div>';
+        return;
+      }
+
+      manualExerciseList.innerHTML = state.manualExercises.map((ex, exIndex) => {
+        const lastData = getLastExercisePerformance(ex.name);
+        return `
+          <div class="exercise-card">
+            <div class="exercise-head">
+              <div>
+                <h3>${escapeHtml(ex.name)}</h3>
+                <div class="muted tiny">${lastData ? `Last time: ${escapeHtml(formatSetSummary(lastData.sets))}` : 'No previous data'}</div>
+              </div>
+              <button class="btn btn-danger tiny" onclick="removeExercise(${exIndex}, true)">Remove</button>
+            </div>
+            ${ex.sets.map((set, setIndex) => `
+              <div class="set-grid">
+                <div class="set-label">Set ${setIndex + 1}</div>
+                <input type="number" min="0" placeholder="Weight" value="${set.weight ?? ''}" onchange="updateSetValue(${exIndex}, ${setIndex}, 'weight', this.value, true)">
+                <input type="number" min="0" placeholder="Reps" value="${set.reps ?? ''}" onchange="updateSetValue(${exIndex}, ${setIndex}, 'reps', this.value, true)">
+                <button class="btn btn-secondary" onclick="removeSet(${exIndex}, ${setIndex}, true)">×</button>
+              </div>
+            `).join('')}
+            <div class="btn-row" style="margin-top: 10px;">
+              <button class="btn btn-secondary" onclick="addSet(${exIndex}, true)">+ Add Set</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function saveManualWorkout() {
+      const date = document.getElementById('manualDate').value;
+      const time = document.getElementById('manualTime').value;
+      const duration = Number(document.getElementById('manualDuration').value || 0);
+      const split = document.getElementById('manualSplit').value;
+      const muscles = document.getElementById('manualMuscles').value.trim();
+      const whoop = parseNullableNumber(document.getElementById('manualWhoop').value);
+
+      if (!date || !time) {
+        alert('Please enter a date and time.');
+        return;
+      }
+      if (!duration) {
+        alert('Please enter duration in minutes.');
+        return;
+      }
+
+      const startISO = new Date(`${date}T${time}`).toISOString();
+      const endISO = new Date(new Date(startISO).getTime() + duration * 60000).toISOString();
+
+      const workout = {
+        id: crypto.randomUUID(),
+        split,
+        muscles,
+        startISO,
+        endISO,
+        durationMinutes: duration,
+        whoopStrain: whoop,
+        notes: '',
+        exercises: state.manualExercises
+      };
+
+      state.workouts.push(workout);
+      saveWorkouts();
+      renderHome();
+      showScreen('home');
+    }
+
+    function getMostRecentWorkout() {
+      if (!state.workouts.length) return null;
+      return [...state.workouts].sort((a, b) => new Date(b.startISO) - new Date(a.startISO))[0];
+    }
+
+    function getLastExercisePerformance(name) {
+      const workouts = [...state.workouts].sort((a, b) => new Date(b.startISO) - new Date(a.startISO));
+      for (const workout of workouts) {
+        const match = workout.exercises.find(ex => ex.name.toLowerCase() === name.toLowerCase());
+        if (match) return match;
+      }
+      return null;
+    }
+
+    function startTimer() {
+      stopTimer();
+      updateTimer();
+      state.timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function updateTimer() {
+      if (!state.currentWorkout) return;
+      const diff = Math.max(0, Math.floor((Date.now() - new Date(state.currentWorkout.startISO).getTime()) / 1000));
+      const hh = String(Math.floor(diff / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      const ss = String(diff % 60).padStart(2, '0');
+      timerDisplay.textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    function addSet(exIndex, isManual) {
+      const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
+      arr[exIndex].sets.push({ weight: '', reps: '' });
+      isManual ? renderManualExercises() : renderCurrentWorkout();
+    }
+
+    function removeSet(exIndex, setIndex, isManual) {
+      const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
+      arr[exIndex].sets.splice(setIndex, 1);
+      if (!arr[exIndex].sets.length) arr[exIndex].sets.push({ weight: '', reps: '' });
+      isManual ? renderManualExercises() : renderCurrentWorkout();
+    }
+
+    function removeExercise(exIndex, isManual) {
+      const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
+      arr.splice(exIndex, 1);
+      isManual ? renderManualExercises() : renderCurrentWorkout();
+    }
+
+    function updateSetValue(exIndex, setIndex, field, value, isManual) {
+      const arr = isManual ? state.manualExercises : state.currentWorkout.exercises;
+      arr[exIndex].sets[setIndex][field] = value === '' ? '' : Number(value);
+    }
+
+    function formatSetSummary(sets) {
+      return sets.map(s => `${s.weight || 0}×${s.reps || 0}`).join(', ');
+    }
+
+    function formatFullDate(date) {
+      return new Intl.DateTimeFormat(undefined, {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      }).format(date);
+    }
+
+    function formatShortDate(iso) {
+      return new Intl.DateTimeFormat(undefined, {
+        month: 'short', day: 'numeric', year: 'numeric'
+      }).format(new Date(iso));
+    }
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat(undefined, {
+        hour: 'numeric', minute: '2-digit'
+      }).format(date);
+    }
+
+    function toDateInputValue(date) {
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    }
+
+    function toTimeInputValue(date) {
+      return date.toTimeString().slice(0, 5);
+    }
+
+    function parseNullableNumber(val) {
+      return val === '' ? null : Number(val);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    window.addSet = addSet;
+    window.removeSet = removeSet;
+    window.removeExercise = removeExercise;
+    window.updateSetValue = updateSetValue;
+  </script>
+</body>
+</html>
