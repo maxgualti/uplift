@@ -288,24 +288,15 @@
       <div class="card">
         <h2>Start Workout</h2>
         <div id="suggestionBox" class="inline-note"></div>
-        <div class="grid grid-2">
-          <div>
-            <label for="splitSelect">Workout Type</label>
+        <div>
+            <label for="splitSelect">Workout Day Name</label>
             <select id="splitSelect">
               <option>Push</option>
               <option>Pull</option>
+              <option>Shoulders</option>
               <option>Legs</option>
-              <option>Upper</option>
-              <option>Lower</option>
-              <option>Full Body</option>
-              <option>Custom</option>
             </select>
           </div>
-          <div>
-            <label for="musclesText">Muscles Hit</label>
-            <input id="musclesText" type="text" placeholder="Chest, shoulders, triceps" />
-          </div>
-        </div>
         <div class="divider"></div>
         <div class="btn-row">
           <button class="btn btn-primary" id="confirmStartBtn">Start This Workout</button>
@@ -359,20 +350,13 @@
           </div>
         </div>
         <div style="margin-top: 10px;">
-          <label for="manualSplit">Workout Type</label>
+          <label for="manualSplit">Workout Day Name</label>
           <select id="manualSplit">
             <option>Push</option>
             <option>Pull</option>
+            <option>Shoulders</option>
             <option>Legs</option>
-            <option>Upper</option>
-            <option>Lower</option>
-            <option>Full Body</option>
-            <option>Custom</option>
           </select>
-        </div>
-        <div style="margin-top: 10px;">
-          <label for="manualMuscles">Muscles Hit</label>
-          <input id="manualMuscles" type="text" placeholder="Back, biceps" />
         </div>
         <div class="divider"></div>
         <div class="btn-row">
@@ -444,7 +428,6 @@
     const historyList = document.getElementById('historyList');
     const suggestionBox = document.getElementById('suggestionBox');
     const splitSelect = document.getElementById('splitSelect');
-    const musclesText = document.getElementById('musclesText');
     const activeTitle = document.getElementById('activeTitle');
     const activeMeta = document.getElementById('activeMeta');
     const timerDisplay = document.getElementById('timerDisplay');
@@ -524,7 +507,6 @@
           </div>
         </div>
         <div style="margin-top: 12px;" class="muted small">
-          ${escapeHtml(last.muscles || 'No muscles listed')}<br>
           ${last.exercises.length} exercise${last.exercises.length === 1 ? '' : 's'}
         </div>
       `;
@@ -538,7 +520,6 @@
             </div>
             <div class="tiny muted">${w.exercises.length} ex.</div>
           </div>
-          <div class="muted small">${escapeHtml(w.muscles || 'No muscles listed')}</div>
         </div>
       `).join('');
     }
@@ -547,7 +528,6 @@
       const suggestion = getSuggestedWorkout();
       suggestionBox.textContent = suggestion.message;
       splitSelect.value = suggestion.split;
-      musclesText.value = suggestion.muscles;
       showScreen('start');
     }
 
@@ -556,40 +536,24 @@
       if (!last) {
         return {
           split: 'Push',
-          muscles: 'Chest, shoulders, triceps',
           message: 'No previous workout found. Starting with Push is a simple default.'
         };
       }
 
-      const sequence = ['Push', 'Pull', 'Legs'];
+      const sequence = ['Push', 'Pull', 'Shoulders', 'Legs'];
       const idx = sequence.indexOf(last.split);
       if (idx !== -1) {
         const nextSplit = sequence[(idx + 1) % sequence.length];
         return {
           split: nextSplit,
-          muscles: defaultMuscles(nextSplit),
           message: `Last workout was ${last.split} on ${formatShortDate(last.startISO)}. Suggested next workout: ${nextSplit}.`
         };
       }
 
       return {
-        split: last.split,
-        muscles: last.muscles || '',
-        message: `Last workout was ${last.split} on ${formatShortDate(last.startISO)}. Repeating that split for now.`
+        split: 'Push',
+        message: `Last workout was ${last.split} on ${formatShortDate(last.startISO)}. Defaulting back to Push.`
       };
-    }
-
-    function defaultMuscles(split) {
-      const map = {
-        Push: 'Chest, shoulders, triceps',
-        Pull: 'Back, biceps',
-        Legs: 'Quads, hamstrings, glutes, calves',
-        Upper: 'Chest, back, shoulders, arms',
-        Lower: 'Quads, hamstrings, glutes, calves',
-        'Full Body': 'Full body',
-        Custom: ''
-      };
-      return map[split] || '';
     }
 
     function startWorkout() {
@@ -597,7 +561,6 @@
       state.currentWorkout = {
         id: crypto.randomUUID(),
         split: splitSelect.value,
-        muscles: musclesText.value.trim(),
         startISO: now.toISOString(),
         endISO: null,
         durationMinutes: 0,
@@ -606,8 +569,7 @@
         exercises: []
       };
 
-      activeTitle.textContent = `${state.currentWorkout.split} Workout`;
-      activeMeta.textContent = `${state.currentWorkout.muscles || 'No muscles listed'} · Started ${formatTime(now)}`;
+      activeTitle.textContent = `${state.currentWorkout.split} Workout`;      activeMeta.textContent = `Started ${formatTime(now)}`;
       renderCurrentWorkout();
       startTimer();
       showScreen('active');
@@ -708,7 +670,6 @@
       document.getElementById('manualDuration').value = '';
       document.getElementById('manualWhoop').value = '';
       document.getElementById('manualSplit').value = 'Push';
-      document.getElementById('manualMuscles').value = '';
     }
 
     function addExerciseToManualWorkout() {
@@ -764,7 +725,6 @@
       const time = document.getElementById('manualTime').value;
       const duration = Number(document.getElementById('manualDuration').value || 0);
       const split = document.getElementById('manualSplit').value;
-      const muscles = document.getElementById('manualMuscles').value.trim();
       const whoop = parseNullableNumber(document.getElementById('manualWhoop').value);
 
       if (!date || !time) {
@@ -782,7 +742,6 @@
       const workout = {
         id: crypto.randomUUID(),
         split,
-        muscles,
         startISO,
         endISO,
         durationMinutes: duration,
